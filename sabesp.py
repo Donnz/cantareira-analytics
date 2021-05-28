@@ -1,10 +1,12 @@
 import json
 from datetime import datetime
+
 import pandas as pd
 import urllib3
 from fastcore.all import typedispatch
 
 URL = r'http://mananciais.sabesp.com.br/api/Mananciais/RepresasSistemasNivel'
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def sabesp_data(start: str, end: str) -> pd.DataFrame:
@@ -43,22 +45,22 @@ def get_data(dates: dict):
 
 @typedispatch
 def get_data(dates: list):
-    data = []
-    for date in dates:
-        data.extend(call_sabesp(date))
-    return build_df(data)
+    return build_df([day for subset
+                    in list(map(call_sabesp, dates))
+                    for day in subset])
 
 
 def call_sabesp(dates: dict):
     start: str = dates['start']
     end: str = dates['end']
     values: list = []
-    http = urllib3.PoolManager().request
+    http = urllib3.PoolManager(cert_reqs='CERT_NONE').request
     try:
+        print(f'Getting data from {start} to {end}...')
         data: dict = json.loads(http('GET', f'{URL}/{start}/{end}/0').data)
-    except Exception:
-        raise ('API unavailable')
-    data = data.get('ReturnObj')
+    except Exception as e:
+        print(e)
+    data: dict = data.get('ReturnObj')
     for rec_gen, rec_esi in zip(data.get('ListaDadosSistema'),
                                 data.get('ListaDadosLocais')):
         date = datetime.strptime(rec_gen['Data'], "%Y-%m-%dT%H:%M:%S")
@@ -71,25 +73,24 @@ def call_sabesp(dates: dict):
         percent = rec_gen['objSistema']['VolumePorcentagem']
         input = rec_gen['objSistema']['VazaoNatural']
         output = rec_esi['Dados'][4]['Valor']
-        values.append([year, month, day, full_date, stored,
-                       percent, rain, input, output])
+        values.append([
+            year, month, day, full_date, stored, percent, rain, input, output
+        ])
     return values
 
 
 def build_df(records: list):
+    print('Building DataFrame...')
     cols: list = [
-        r'Ano',
-        r'Mes',
-        r'Dia',
-        r'Data (aaaa/mm/dd)',
-        r'Volume Operacional (hm3)',
-        r'Volume Operacional (%)',
-        r'Precipitacao (mm)',
-        r'Vazao Afluente(m3/s)',
-        r'Vazao de Retirada(m3/s)'
+        r'year', r'month', r'day', r'date',
+        r'Volume Operacional (hm3)', r'Volume Operacional (%)',
+        r'Precipitacao (mm)', r'Vazao Afluente (m3_s)',
+        r'Vazao de Retirada (m3_s)'
     ]
     return pd.DataFrame(records, columns=cols)
 
 
 if __name__ == '__main__':
-    print(sabesp_data('2013-01-01', '2021-03-31'))
+    sdata = sabesp_data('2012-01-01', '2021-03-31')
+    print(sdata)
+    sdata.to_clipboard()

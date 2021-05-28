@@ -1,3 +1,9 @@
 {
-    "python.pythonPath": "C:\\Users\\WallaceVieira\\anaconda3\\envs\\cantareira\\python.exe"
+    "python.pythonPath": "C:\\Users\\WallaceVieira\\anaconda3\\envs\\cantareira\\python.exe",
+    "python.linting.flake8Enabled": false,
+    "python.linting.pycodestyleEnabled": false,
+    "python.linting.pylamaEnabled": false,
+    "python.linting.mypyEnabled": false,
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true
 }
