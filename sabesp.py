@@ -19,6 +19,9 @@ def sabesp_data(start: str, end: str) -> pd.DataFrame:
 
     Start and end dates should be in ISO 8601 format (yyyy-mm-dd)
     '''
+    
+    '''If the date range is bigger than a year, the "datesplit" function
+    is called before calling "call_sabesp"'''
     if int(end[:4]) - int(start[:4]) <= 1:
         dates = {'start': start, 'end': end}
         return (get_data(dates))
@@ -26,6 +29,8 @@ def sabesp_data(start: str, end: str) -> pd.DataFrame:
 
 
 def datesplit(start: str, end: str):
+    '''split the range informed by the user in a list of small ranges
+    as the Sabesp servers cannot deal with date ranges bigger than 2 years'''
     original_start = datetime.strptime(start, "%Y-%m-%d")
     original_end = datetime.strptime(end, "%Y-%m-%d")
     dates: list = []
