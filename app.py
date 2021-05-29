@@ -20,18 +20,10 @@ RAW_DF: pd.DataFrame = pd.read_pickle(DF_PATH)
 def heatmap(field: str, issum: bool = True) -> None:
     plt.figure()
     months: dict = {
-        '01': 'Jan',
-        '02': 'Fev',
-        '03': 'Mar',
-        '04': 'Abr',
-        '05': 'Mai',
-        '06': 'Jun',
-        '07': 'Jul',
-        '08': 'Ago',
-        '09': 'Set',
-        '10': 'Out',
-        '11': 'Nov',
-        '12': 'Dez',
+        '01': 'Jan', '02': 'Fev', '03': 'Mar',
+        '04': 'Abr', '05': 'Mai', '06': 'Jun',
+        '07': 'Jul', '08': 'Ago', '09': 'Set',
+        '10': 'Out', '11': 'Nov', '12': 'Dez',
     }
     df = RAW_DF[["date", field]]
     df['date'] = df['date'].apply(dateutil.parser.parse)
@@ -88,14 +80,17 @@ if __name__ == '__main__':
         r'Vazao de Retirada (m3_s)'
     ]
 
-    '''aggr_methods: list = [False, False, True, False, False]
+    aggr_methods: list = [False, False, True, False, False]
 
     for field, method in zip(fields, aggr_methods):
         heatmap(field, method)
+    print("Heatmaps generated")
 
     for field in product(fields, fields):
         if field[0][0:4] != field[1][0:4]:
-            joint_grid(field[0], field[1])'''
+            joint_grid(field[0], field[1])
+    print("jointgrids generated")
 
     for field in fields:
         hist(field)
+    print("histograms generated")
